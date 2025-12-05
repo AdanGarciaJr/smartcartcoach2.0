@@ -1,0 +1,60 @@
+export interface Nutriments {
+  energyKcal: number | null;
+  carbs: number | null;
+  fat: number | null;
+  protein: number | null;
+  sugars: number | null;
+  salt: number | null;
+}
+
+export interface FoodProduct {
+  barcode: string;
+  name: string;
+  brand: string;
+  quantity: string;
+  imageUrl: string;
+  nutriments: Nutriments;
+}
+
+// Fetch product info from OpenFoodFacts by barcode
+// https://world.openfoodfacts.org/api/v0/product/{barcode}.json
+export async function fetchFoodByBarcode(barcode: string): Promise<FoodProduct> {
+  if (!barcode) {
+    throw new Error("No barcode provided");
+  }
+
+  const url = `https://world.openfoodfacts.org/api/v0/product/${barcode}.json`;
+
+  const res = await fetch(url);
+  if (!res.ok) {
+    throw new Error(`API error: ${res.status}`);
+  }
+
+  const data = await res.json();
+
+  if (data.status !== 1 || !data.product) {
+    throw new Error("Product not found in database");
+  }
+
+  const p = data.product;
+  const nutriments = p.nutriments || {};
+
+  return {
+    barcode: data.code,
+    name: p.product_name || "Unknown product",
+    brand: p.brands || "",
+    quantity: p.quantity || "",
+    imageUrl: p.image_front_url || p.image_url || "",
+    nutriments: {
+      energyKcal:
+        nutriments["energy-kcal_100g"] ??
+        nutriments.energy_kcal_100g ??
+        null,
+      carbs: nutriments.carbohydrates_100g ?? null,
+      fat: nutriments.fat_100g ?? null,
+      protein: nutriments.proteins_100g ?? null,
+      sugars: nutriments.sugars_100g ?? null,
+      salt: nutriments.salt_100g ?? null,
+    },
+  };
+}
