@@ -16,13 +16,12 @@ export const FoodSearch: React.FC<{
     return () => clearTimeout(t);
   }, [query]);
 
-  const canSearch = useMemo(() => debounced.length >= 2, [debounced]);
-
+  // fetch on debounced
   useEffect(() => {
     let cancelled = false;
 
     async function run() {
-      if (!canSearch) {
+      if (!debounced) {
         setResults([]);
         setError("");
         return;
@@ -32,8 +31,8 @@ export const FoodSearch: React.FC<{
       setError("");
 
       try {
-        const foods = await searchFoods(debounced, 12);
-        if (!cancelled) setResults(foods);
+        const items = await searchFoods(debounced);
+        if (!cancelled) setResults(items);
       } catch (e: any) {
         if (!cancelled) setError(e?.message || "Search failed");
       } finally {
@@ -45,75 +44,94 @@ export const FoodSearch: React.FC<{
     return () => {
       cancelled = true;
     };
-  }, [debounced, canSearch]);
+  }, [debounced]);
+
+  const hasResults = useMemo(() => results.length > 0, [results]);
 
   return (
-    <div className="card" style={{ marginTop: "1rem" }}>
-      <h2 className="card-title">Search foods</h2>
-      <p className="card-subtitle">Search by product name or brand (no barcode needed).</p>
+    <div className="card">
+      <h3>Food Search</h3>
 
-      <div style={{ display: "flex", gap: 10, flexWrap: "wrap", alignItems: "center" }}>
+      <label style={{ display: "grid", gap: 6 }}>
+        <span>Search products</span>
         <input
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          placeholder="Try: oreo, greek yogurt, doritos…"
-          style={{ padding: 10, minWidth: 280, flex: 1 }}
+          placeholder="Try: greek yogurt, tortilla, cereal…"
         />
-        <span style={{ opacity: 0.8, fontSize: 13 }}>
-          {canSearch ? "Searching…" : "Type 2+ chars"}
-        </span>
-      </div>
+      </label>
 
-      {loading && <p style={{ marginTop: 10 }}>Looking up products…</p>}
-      {error && <p style={{ marginTop: 10, color: "red" }}>{error}</p>}
+      {loading && <p style={{ marginTop: 10 }}>Searching…</p>}
+      {error && <p style={{ marginTop: 10, color: "crimson" }}>{error}</p>}
 
-      {!loading && !error && canSearch && results.length === 0 && (
-        <p style={{ marginTop: 10 }}>No results found.</p>
+      {!loading && !error && debounced && !hasResults && (
+        <p style={{ marginTop: 10, opacity: 0.85 }}>No results found.</p>
       )}
 
-      {results.length > 0 && (
+      {hasResults && (
         <div style={{ marginTop: 12, display: "grid", gap: 10 }}>
-          {results.map((p) => (
-            <div
-              key={p.barcode + p.name}
-              style={{
-                display: "flex",
-                gap: 12,
-                alignItems: "center",
-                justifyContent: "space-between",
-                padding: 12,
-                borderRadius: 12,
-                border: "1px solid rgba(255,255,255,0.15)",
-                background: "rgba(0,0,0,0.12)",
-                flexWrap: "wrap",
-              }}
-            >
-              <div style={{ display: "flex", gap: 12, alignItems: "center", minWidth: 260 }}>
-                {p.imageUrl ? (
-                  <img
-                    src={p.imageUrl}
-                    alt={p.name}
-                    style={{ width: 54, height: 54, objectFit: "cover", borderRadius: 10 }}
-                  />
-                ) : (
-                  <div style={{ width: 54, height: 54, borderRadius: 10, background: "rgba(255,255,255,0.08)" }} />
-                )}
+          {results.map((p) => {
+            const servingAvailable =
+              Object.values(p.nutrimentsPerServing || {}).some((v) => v != null);
 
-                <div>
-                  <div style={{ fontWeight: 800 }}>{p.name}</div>
-                  <div style={{ opacity: 0.8, fontSize: 13 }}>
-                    {p.brand ? `Brand: ${p.brand}` : "Brand: -"}
-                    {" · "}
-                    {p.nutriments.energyKcal != null ? `${p.nutriments.energyKcal} kcal/100g` : "kcal: -"}
+            const kcalLabel =
+              p.nutrimentsPerServing?.energyKcal != null
+                ? `${p.nutrimentsPerServing.energyKcal} kcal/serving${p.servingSize ? ` (${p.servingSize})` : ""}`
+                : p.nutriments.energyKcal != null
+                  ? `${p.nutriments.energyKcal} kcal/100g`
+                  : "kcal: -";
+
+            return (
+              <div
+                key={p.barcode || `${p.name}-${p.brand}-${Math.random()}`}
+                style={{
+                  display: "grid",
+                  gap: 10,
+                  padding: 10,
+                  borderRadius: 10,
+                  border: "1px solid rgba(255,255,255,0.12)",
+                }}
+              >
+                <div style={{ display: "flex", gap: 12, alignItems: "flex-start" }}>
+                  {p.imageUrl ? (
+                    <img
+                      src={p.imageUrl}
+                      alt={p.name}
+                      style={{ width: 72, height: 72, objectFit: "cover", borderRadius: 8 }}
+                    />
+                  ) : (
+                    <div
+                      style={{
+                        width: 72,
+                        height: 72,
+                        borderRadius: 8,
+                        background: "#222",
+                        display: "grid",
+                        placeItems: "center",
+                        fontSize: 12,
+                        opacity: 0.8,
+                      }}
+                    >
+                      No image
+                    </div>
+                  )}
+
+                  <div style={{ flex: 1, display: "grid", gap: 2 }}>
+                    <div style={{ fontWeight: 700 }}>{p.name}</div>
+                    {!!p.brand && <div style={{ opacity: 0.9 }}>{p.brand}</div>}
+                    <div style={{ fontSize: 12, opacity: 0.8 }}>
+                      {kcalLabel}
+                      {!servingAvailable && " (serving data not provided)"}
+                    </div>
                   </div>
                 </div>
-              </div>
 
-              <button type="button" onClick={() => onPickProduct(p)}>
-                Add to results
-              </button>
-            </div>
-          ))}
+                <button type="button" onClick={() => onPickProduct(p)}>
+                  Add to results
+                </button>
+              </div>
+            );
+          })}
         </div>
       )}
     </div>

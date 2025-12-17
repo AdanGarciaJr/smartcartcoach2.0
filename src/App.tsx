@@ -4,6 +4,7 @@ import { GroceryList, GroceryListHandle } from "./components/GroceryList";
 import { FoodProduct } from "./api/foodApi";
 import { ProductCompare } from "./components/ProductCompare";
 import { FoodSearch } from "./components/FoodSearch";
+import { UserProfile } from "./components/UserProfile";
 import "./styles.css";
 
 export const App: React.FC = () => {
@@ -38,8 +39,7 @@ export const App: React.FC = () => {
         <h1>SmartCart Coach 2.0</h1>
 
         <p>
-          Milestone 2 prototype. Scan products, add scanned items to your grocery list,
-          and compare two products side by side with a Swap Score.
+          <UserProfile />
         </p>
       </header>
 
