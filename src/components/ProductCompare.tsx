@@ -1,20 +1,5 @@
-import React, { useMemo } from "react";
+import React from "react";
 import { FoodProduct, Nutriments } from "../api/foodApi";
-import { SwapScoreBadge } from "./SwapScoreBadge";
-
-function clamp(n: number, min: number, max: number) {
-  return Math.min(max, Math.max(min, n));
-}
-
-function computeSwapScore(price: number, calories: number): number {
-  const maxCalories = 800;
-  const maxPrice = 15;
-
-  const caloriesScore = 1 - clamp(calories, 0, maxCalories) / maxCalories;
-  const priceScore = 1 - clamp(price, 0, maxPrice) / maxPrice;
-
-  return clamp((0.6 * caloriesScore + 0.4 * priceScore) * 100, 0, 100);
-}
 
 function caloriesFromProduct(p: FoodProduct): number | null {
   return p.nutrimentsPerServing?.energyKcal ?? p.nutriments.energyKcal ?? null;
@@ -38,7 +23,6 @@ function metricColor(
   other: number | null | undefined,
   rule: BetterRule
 ): React.CSSProperties {
-  // neutral if missing or tie
   if (mine == null || other == null) return { color: "inherit" };
   if (mine === other) return { color: "inherit" };
 
@@ -63,16 +47,6 @@ export const ProductCompare: React.FC<{
   const leftCalories = left ? caloriesFromProduct(left) : null;
   const rightCalories = right ? caloriesFromProduct(right) : null;
 
-  const leftScore = useMemo(
-    () => computeSwapScore(leftPrice, leftCalories ?? 0),
-    [leftPrice, leftCalories]
-  );
-  const rightScore = useMemo(
-    () => computeSwapScore(rightPrice, rightCalories ?? 0),
-    [rightPrice, rightCalories]
-  );
-
-  // Convenience values (so styles compare the same metric across both sides)
   const L = leftShown?.macros;
   const R = rightShown?.macros;
 
@@ -94,6 +68,13 @@ export const ProductCompare: React.FC<{
 
               <p style={{ marginTop: 10 }}>
                 Basis: <strong>{leftShown?.label}</strong>
+              </p>
+
+              <p>
+                Price (USD):{" "}
+                <strong style={metricColor(leftPrice, rightPrice, "lower")}>
+                  {fmt(leftPrice, " USD")}
+                </strong>
               </p>
 
               <p>
@@ -137,10 +118,6 @@ export const ProductCompare: React.FC<{
                   {fmt(L?.salt)}
                 </strong>
               </p>
-
-              <div style={{ marginTop: 10 }}>
-                <SwapScoreBadge score={leftScore} />
-              </div>
             </>
           )}
         </div>
@@ -158,6 +135,13 @@ export const ProductCompare: React.FC<{
 
               <p style={{ marginTop: 10 }}>
                 Basis: <strong>{rightShown?.label}</strong>
+              </p>
+
+              <p>
+                Price (USD):{" "}
+                <strong style={metricColor(rightPrice, leftPrice, "lower")}>
+                  {fmt(rightPrice, " USD")}
+                </strong>
               </p>
 
               <p>
@@ -201,17 +185,13 @@ export const ProductCompare: React.FC<{
                   {fmt(R?.salt)}
                 </strong>
               </p>
-
-              <div style={{ marginTop: 10 }}>
-                <SwapScoreBadge score={rightScore} />
-              </div>
             </>
           )}
         </div>
       </div>
 
       <p style={{ marginTop: 10, fontSize: 12, opacity: 0.8 }}>
-        Green = better, Red = worse. Rules: higher protein is better; lower calories/carbs/fat/sugars/salt is better.
+        Green = better, Red = worse. Rules: higher protein is better; lower price/calories/carbs/fat/sugars/salt is better.
       </p>
     </div>
   );

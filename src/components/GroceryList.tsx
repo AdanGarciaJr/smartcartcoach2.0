@@ -1,26 +1,11 @@
 import React, { useImperativeHandle, forwardRef, useState } from "react";
 import { GroceryItem } from "../types";
 import { useLocalStorage } from "../hooks/useLocalStorage";
-import { SwapScoreBadge } from "./SwapScoreBadge";
 
 interface NewItemFormState {
   name: string;
   price: string;
   calories: string;
-}
-
-function computeSwapScore(price: number, calories: number): number {
-  const maxCalories = 800;
-  const maxPrice = 15;
-
-  const caloriesClamped = Math.min(Math.max(calories, 0), maxCalories);
-  const priceClamped = Math.min(Math.max(price, 0), maxPrice);
-
-  const caloriesScore = 1 - caloriesClamped / maxCalories;
-  const priceScore = 1 - priceClamped / maxPrice;
-
-  const combined = 0.6 * caloriesScore + 0.4 * priceScore;
-  return Math.max(0, Math.min(100, combined * 100));
 }
 
 export type GroceryListHandle = {
@@ -47,7 +32,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
       name: name.trim(),
       price,
       calories,
-      swapScore: computeSwapScore(price, calories),
     };
     setItems((prev) => [...prev, newItem]);
   }
@@ -82,7 +66,7 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
     <div className="card">
       <h2 className="card-title">Grocery List</h2>
       <p className="card-subtitle">
-        Add items manually or from scanned products. Swap Score uses price + calories.
+        Keep a running list while you compare products side by side.
       </p>
 
       <form className="form" onSubmit={handleAddItem}>
@@ -126,7 +110,7 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
       </form>
 
       {items.length === 0 ? (
-        <p className="empty-state">No items yet. Add a few products to see their Swap Scores.</p>
+        <p className="empty-state">No items yet. Add a few products to track as you browse.</p>
       ) : (
         <table className="items-table">
           <thead>
@@ -134,7 +118,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
               <th>Item</th>
               <th>Price</th>
               <th>Calories</th>
-              <th>Swap Score</th>
               <th />
             </tr>
           </thead>
@@ -144,9 +127,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
                 <td>{item.name}</td>
                 <td>${item.price.toFixed(2)}</td>
                 <td>{item.calories.toFixed(0)}</td>
-                <td>
-                  <SwapScoreBadge score={item.swapScore} />
-                </td>
                 <td>
                   <button
                     type="button"
