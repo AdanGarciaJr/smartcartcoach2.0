@@ -1,0 +1,406 @@
+:root {
+  color-scheme: dark;
+
+  /* Colors */
+  --bg: #020617;
+  --bg2: #0b1223;
+  --surface: rgba(2, 6, 23, 0.55);
+  --surface-2: rgba(15, 23, 42, 0.7);
+  --border: rgba(148, 163, 184, 0.22);
+  --border-strong: rgba(148, 163, 184, 0.32);
+
+  --text: #e5e7eb;
+  --muted: rgba(229, 231, 235, 0.72);
+  --muted2: rgba(229, 231, 235, 0.58);
+
+  --accent: #38bdf8;
+  --danger: #ef4444;
+
+  /* Layout + motion */
+  --radius: 16px;
+  --radius-sm: 12px;
+  --shadow: 0 18px 40px rgba(0, 0, 0, 0.55);
+  --shadow-soft: 0 10px 24px rgba(0, 0, 0, 0.35);
+
+  --container: 980px;
+
+  /* Spacing scale */
+  --s1: 6px;
+  --s2: 10px;
+  --s3: 14px;
+  --s4: 18px;
+  --s5: 24px;
+  --s6: 32px;
+
+  /* Typography */
+  --font: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI",
+    Roboto, "Helvetica Neue", Arial, "Noto Sans", "Apple Color Emoji",
+    "Segoe UI Emoji";
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html,
+body {
+  height: 100%;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font);
+  color: var(--text);
+  background:
+    radial-gradient(900px 500px at 50% -10%, rgba(56, 189, 248, 0.18), transparent 55%),
+    radial-gradient(700px 420px at 15% 20%, rgba(168, 85, 247, 0.12), transparent 55%),
+    radial-gradient(900px 700px at 85% 30%, rgba(34, 211, 238, 0.08), transparent 55%),
+    linear-gradient(180deg, var(--bg2), var(--bg));
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Links */
+a {
+  color: inherit;
+}
+
+/* ---------------------------
+   App layout
+---------------------------- */
+.app-root {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--s5) var(--s4);
+  gap: var(--s4);
+}
+
+@media (max-width: 520px) {
+  .app-root {
+    padding: var(--s4) var(--s3);
+  }
+}
+
+.app-header {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  text-align: center;
+  padding-top: var(--s2);
+}
+
+.app-header h1 {
+  margin: 0 0 var(--s2) 0;
+  font-size: clamp(1.55rem, 3.8vw, 2.2rem);
+  letter-spacing: 0.02em;
+  line-height: 1.15;
+}
+
+.app-header p {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.98rem;
+}
+
+.app-main {
+  flex: 1;
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+
+.app-footer {
+  text-align: center;
+  color: var(--muted2);
+  font-size: 0.78rem;
+  padding-bottom: var(--s2);
+}
+
+/* ---------------------------
+   Card
+---------------------------- */
+.card {
+  width: 100%;
+  max-width: var(--container);
+  background:
+    linear-gradient(180deg, rgba(15, 23, 42, 0.62), rgba(2, 6, 23, 0.62));
+  border-radius: var(--radius);
+  padding: var(--s5);
+  box-shadow: var(--shadow);
+  border: 1px solid var(--border);
+  backdrop-filter: blur(10px);
+}
+
+@media (max-width: 520px) {
+  .card {
+    padding: var(--s4);
+    border-radius: 18px;
+  }
+}
+
+.card-title {
+  margin: 0 0 var(--s1) 0;
+  font-size: 1.25rem;
+  line-height: 1.2;
+}
+
+.card-subtitle {
+  margin: 0 0 var(--s4) 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ---------------------------
+   Forms
+---------------------------- */
+.form {
+  display: grid;
+  gap: var(--s3);
+  margin-bottom: var(--s4);
+}
+
+.form-row {
+  display: grid;
+  gap: var(--s3);
+}
+
+/* Mobile first: stack */
+@media (min-width: 768px) {
+  .form-row {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+}
+
+label {
+  display: grid;
+  gap: 6px;
+  font-size: 0.88rem;
+  color: var(--muted);
+}
+
+/* Unified controls */
+input,
+select,
+textarea {
+  width: 100%;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: rgba(2, 6, 23, 0.7);
+  padding: 10px 12px;
+  color: var(--text);
+  font-size: 0.95rem;
+  outline: none;
+  transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+select {
+  appearance: none;
+  background-image:
+    linear-gradient(45deg, transparent 50%, rgba(229,231,235,0.75) 50%),
+    linear-gradient(135deg, rgba(229,231,235,0.75) 50%, transparent 50%);
+  background-position:
+    calc(100% - 16px) calc(50% - 2px),
+    calc(100% - 10px) calc(50% - 2px);
+  background-size: 6px 6px, 6px 6px;
+  background-repeat: no-repeat;
+  padding-right: 34px;
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  border-color: rgba(56, 189, 248, 0.85);
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22);
+}
+
+/* Better tap targets on phones */
+@media (max-width: 520px) {
+  input,
+  select,
+  textarea {
+    padding: 12px 12px;
+    font-size: 1rem;
+  }
+}
+
+/* ---------------------------
+   Buttons
+   (This styles your plain <button> in App.tsx too)
+---------------------------- */
+button,
+.btn-primary,
+.btn-ghost {
+  font: inherit;
+}
+
+button {
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: rgba(15, 23, 42, 0.55);
+  color: var(--text);
+  padding: 10px 14px;
+  cursor: pointer;
+  transition: transform 120ms ease, box-shadow 120ms ease, background-color 120ms ease,
+    border-color 120ms ease;
+  box-shadow: var(--shadow-soft);
+  min-height: 40px;
+}
+
+button:hover {
+  background: rgba(15, 23, 42, 0.75);
+  border-color: var(--border-strong);
+  transform: translateY(-1px);
+}
+
+button:active {
+  transform: translateY(0px);
+}
+
+button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px rgba(56, 189, 248, 0.22), var(--shadow-soft);
+  border-color: rgba(56, 189, 248, 0.75);
+}
+
+/* Primary / ghost (keeps your existing class API) */
+.btn-primary {
+  border: none;
+  background: linear-gradient(135deg, rgba(56, 189, 248, 0.95), rgba(168, 85, 247, 0.95));
+  color: white;
+  font-weight: 700;
+  padding: 10px 16px;
+}
+
+.btn-primary:hover {
+  transform: translateY(-1px);
+}
+
+.btn-ghost {
+  background: transparent;
+  color: var(--muted);
+  box-shadow: none;
+}
+
+.btn-ghost:hover {
+  background: rgba(15, 23, 42, 0.55);
+  color: rgba(252, 165, 165, 0.95);
+  border-color: rgba(252, 165, 165, 0.35);
+}
+
+/* ---------------------------
+   Lists / “Recently scanned items”
+   (Your App.tsx uses inline styles; this helps globally anyway)
+---------------------------- */
+ul {
+  padding-left: 0;
+}
+
+li {
+  list-style: none;
+}
+
+.empty-state {
+  margin: 4px 0 0 0;
+  color: var(--muted);
+  font-size: 0.95rem;
+}
+
+/* ---------------------------
+   Table
+---------------------------- */
+.items-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: var(--s3);
+  font-size: 0.92rem;
+  overflow: hidden;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+}
+
+.items-table th,
+.items-table td {
+  text-align: left;
+  padding: 10px 10px;
+  vertical-align: top;
+}
+
+.items-table thead tr {
+  background: rgba(15, 23, 42, 0.7);
+  border-bottom: 1px solid var(--border);
+  color: var(--muted);
+}
+
+.items-table tbody tr:nth-child(odd) {
+  background: rgba(15, 23, 42, 0.55);
+}
+
+.items-table tbody tr:nth-child(even) {
+  background: rgba(15, 23, 42, 0.38);
+}
+
+/* Phone table: make it easier to read */
+@media (max-width: 520px) {
+  .items-table {
+    font-size: 0.9rem;
+  }
+  .items-table th,
+  .items-table td {
+    padding: 10px 8px;
+  }
+}
+
+/* ---------------------------
+   Motion safety
+---------------------------- */
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+    scroll-behavior: auto !important;
+  }
+}
+/* Main layout: 1 column on phones, 2 columns on desktop */
+.layout {
+  width: 100%;
+  max-width: var(--container);
+  margin: 0 auto;
+  display: grid;
+  gap: var(--s4);
+  grid-template-columns: 1fr;
+}
+
+@media (min-width: 980px) {
+  .layout {
+    grid-template-columns: 1.15fr 0.85fr;
+    align-items: start;
+  }
+}
+
+.compare-block {
+  margin-top: var(--s4);
+  display: grid;
+  gap: var(--s3);
+}
+
+.compare-controls {
+  display: grid;
+  gap: var(--s3);
+}
+
+@media (min-width: 640px) {
+  .compare-controls {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* Make labels + selects feel like one unit */
+.compare-controls label {
+  color: var(--muted);
+  font-size: 0.88rem;
+  display: grid;
+  gap: 6px;
+}
