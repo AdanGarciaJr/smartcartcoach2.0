@@ -3,5 +3,4 @@ export interface GroceryItem {
   name: string;
   price: number;
   calories: number;
-  swapScore: number;
 }
