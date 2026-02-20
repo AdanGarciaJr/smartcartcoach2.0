@@ -6,5 +6,5 @@ export default defineConfig({
   server: {
     port: 5173,
   },
-  base: "/smartcartcoach2.0/",
+  base: "/",
 });
