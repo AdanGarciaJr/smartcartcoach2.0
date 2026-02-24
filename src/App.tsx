@@ -4,7 +4,6 @@ import { GroceryList, GroceryListHandle } from "./components/GroceryList";
 import { FoodProduct } from "./api/foodApi";
 import { ProductCompare } from "./components/ProductCompare";
 import { FoodSearch } from "./components/FoodSearch";
-import { UserProfile } from "./components/UserProfile";
 import "./styles.css";
 
 export const App: React.FC = () => {
@@ -15,7 +14,6 @@ export const App: React.FC = () => {
   const groceryRef = useRef<GroceryListHandle>(null);
 
   const handleProductLoaded = (product: FoodProduct) => {
-    // avoid duplicates by barcode
     setScannedItems((prev) => {
       const exists = prev.some((p) => p.barcode === product.barcode);
       if (exists) return prev;
@@ -37,9 +35,6 @@ export const App: React.FC = () => {
     <div className="app-root">
       <header className="app-header">
         <h1>SmartCart Coach 2.0</h1>
-        <p>
-          <UserProfile />
-        </p>
       </header>
 
       <main className="app-main">
@@ -76,7 +71,7 @@ export const App: React.FC = () => {
                             groceryRef.current?.addExternalItem({
                               name: item.name,
                               calories: item.nutriments.energyKcal ?? 0,
-                              price: 3.99, // placeholder until you add real price integration
+                              price: 3.99,
                             })
                           }
                         >
@@ -121,7 +116,11 @@ export const App: React.FC = () => {
                   </label>
                 </div>
 
-                <ProductCompare left={leftProduct} right={rightProduct} />
+                <ProductCompare
+                  left={leftProduct}
+                  right={rightProduct}
+                  candidates={scannedItems}
+                />
               </div>
             ) : (
               <p className="empty-state">
