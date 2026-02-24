@@ -95,7 +95,7 @@ export const ProductCompare: React.FC<{
         return;
       }
 
-      const resp = await fetch("http://localhost:5174/api/recommend-replacement", {
+      const resp = await fetch("https://smartcartcoach2-0.onrender.com/api/recommend-replacement", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
