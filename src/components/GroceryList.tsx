@@ -4,12 +4,11 @@ import { useLocalStorage } from "../hooks/useLocalStorage";
 
 interface NewItemFormState {
   name: string;
-  price: string;
   calories: string;
 }
 
 export type GroceryListHandle = {
-  addExternalItem: (item: { name: string; calories: number; price?: number }) => void;
+  addExternalItem: (item: { name: string; calories: number;}) => void;
 };
 
 export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_, ref) {
@@ -17,7 +16,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
 
   const [form, setForm] = useState<NewItemFormState>({
     name: "",
-    price: "",
     calories: "",
   });
 
@@ -26,11 +24,10 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
     setForm((prev) => ({ ...prev, [name]: value }));
   }
 
-  function addItem(name: string, price: number, calories: number) {
+  function addItem(name: string, calories: number) {
     const newItem: GroceryItem = {
       id: crypto.randomUUID(),
       name: name.trim(),
-      price,
       calories,
     };
     setItems((prev) => [...prev, newItem]);
@@ -38,24 +35,22 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
 
   useImperativeHandle(ref, () => ({
     addExternalItem: (item) => {
-      const price = item.price ?? 3.99;
-      addItem(item.name, price, item.calories);
+      addItem(item.name, item.calories);
     },
   }));
 
   function handleAddItem(e: React.FormEvent) {
     e.preventDefault();
 
-    const price = parseFloat(form.price);
     const calories = parseFloat(form.calories);
 
-    if (!form.name.trim() || isNaN(price) || isNaN(calories)) {
-      alert("Please enter a name, price, and calories.");
+    if (!form.name.trim() || isNaN(calories)) {
+      alert("Please enter a name, and calories.");
       return;
     }
 
-    addItem(form.name, price, calories);
-    setForm({ name: "", price: "", calories: "" });
+    addItem(form.name, calories);
+    setForm({ name: "", calories: "" });
   }
 
   function handleRemoveItem(id: string) {
@@ -80,18 +75,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
               placeholder="Whole wheat bread"
             />
           </label>
-
-          <label>
-            Price (USD)
-            <input
-              name="price"
-              value={form.price}
-              onChange={handleChange}
-              placeholder="3.49"
-              inputMode="decimal"
-            />
-          </label>
-
           <label>
             Calories per serving
             <input
@@ -116,7 +99,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
           <thead>
             <tr>
               <th>Item</th>
-              <th>Price</th>
               <th>Calories</th>
               <th />
             </tr>
@@ -125,7 +107,6 @@ export const GroceryList = forwardRef<GroceryListHandle>(function GroceryList(_,
             {items.map((item) => (
               <tr key={item.id}>
                 <td>{item.name}</td>
-                <td>${item.price.toFixed(2)}</td>
                 <td>{item.calories.toFixed(0)}</td>
                 <td>
                   <button
