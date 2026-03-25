@@ -5,6 +5,7 @@ export interface Nutriments {
   protein: number | null;
   sugars: number | null;
   salt: number | null;
+  fiber: number | null;
 }
 
 export interface FoodProduct {
@@ -44,6 +45,7 @@ function mapNutriments100g(nutriments: any): Nutriments {
     protein: numOrNull(nutriments?.proteins_100g),
     sugars: numOrNull(nutriments?.sugars_100g),
     salt: numOrNull(nutriments?.salt_100g),
+    fiber: numOrNull(nutriments?.fiber_100g),
   };
 }
 
@@ -55,6 +57,7 @@ function mapNutrimentsServing(nutriments: any): Nutriments {
     protein: numOrNull(nutriments?.proteins_serving),
     sugars: numOrNull(nutriments?.sugars_serving),
     salt: numOrNull(nutriments?.salt_serving),
+    fiber: numOrNull(nutriments?.fiber_serving),
   };
 }
 

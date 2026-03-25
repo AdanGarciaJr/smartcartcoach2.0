@@ -151,18 +151,54 @@ export const ProductCompare: React.FC<{
           {left && (
             <>
               <p>{left.name}</p>
-              <p>
-                Calories:{" "}
-                <strong style={metricColor(leftCalories, rightCalories, "lower")}>
-                  {fmt(leftCalories)}
-                </strong>
-              </p>
-              <p>
-                Protein:{" "}
-                <strong style={metricColor(L?.protein, R?.protein, "higher")}>
-                  {fmt(L?.protein)}
-                </strong>
-              </p>
+                <p>
+                  Calories:{" "}
+                  <strong style={metricColor(leftCalories, rightCalories, "lower")}>
+                    {fmt(leftCalories)}
+                  </strong>
+                </p>
+
+                <p>
+                  Protein:{" "}
+                  <strong style={metricColor(L?.protein, R?.protein, "higher")}>
+                    {fmt(L?.protein)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Carbs:{" "}
+                  <strong style={metricColor(L?.carbs, R?.carbs, "lower")}>
+                    {fmt(L?.carbs)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Fat:{" "}
+                  <strong style={metricColor(L?.fat, R?.fat, "lower")}>
+                    {fmt(L?.fat)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Sugars:{" "}
+                  <strong style={metricColor(L?.sugars, R?.sugars, "lower")}>
+                    {fmt(L?.sugars)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Salt:{" "}
+                  <strong style={metricColor(L?.salt, R?.salt, "lower")}>
+                    {fmt(L?.salt)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Fiber:{" "}
+                  <strong style={metricColor(L?.fiber, R?.fiber, "higher")}>
+                    {fmt(L?.fiber)} g
+                  </strong>
+                </p>
             </>
           )}
         </div>
@@ -172,18 +208,54 @@ export const ProductCompare: React.FC<{
           {right && (
             <>
               <p>{right.name}</p>
-              <p>
-                Calories:{" "}
-                <strong style={metricColor(rightCalories, leftCalories, "lower")}>
-                  {fmt(rightCalories)}
-                </strong>
-              </p>
-              <p>
-                Protein:{" "}
-                <strong style={metricColor(R?.protein, L?.protein, "higher")}>
-                  {fmt(R?.protein)}
-                </strong>
-              </p>
+                <p>
+                  Calories:{" "}
+                  <strong style={metricColor(rightCalories, leftCalories, "lower")}>
+                    {fmt(rightCalories)}
+                  </strong>
+                </p>
+
+                <p>
+                  Protein:{" "}
+                  <strong style={metricColor(R?.protein, L?.protein, "higher")}>
+                    {fmt(R?.protein)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Carbs:{" "}
+                  <strong style={metricColor(R?.carbs, L?.carbs, "lower")}>
+                    {fmt(R?.carbs)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Fat:{" "}
+                  <strong style={metricColor(R?.fat, L?.fat, "lower")}>
+                    {fmt(R?.fat)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Sugars:{" "}
+                  <strong style={metricColor(R?.sugars, L?.sugars, "lower")}>
+                    {fmt(R?.sugars)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Salt:{" "}
+                  <strong style={metricColor(R?.salt, L?.salt, "lower")}>
+                    {fmt(R?.salt)} g
+                  </strong>
+                </p>
+
+                <p>
+                  Fiber:{" "}
+                  <strong style={metricColor(R?.fiber, L?.fiber, "higher")}>
+                    {fmt(R?.fiber)} g
+                  </strong>
+                </p>
             </>
           )}
         </div>
