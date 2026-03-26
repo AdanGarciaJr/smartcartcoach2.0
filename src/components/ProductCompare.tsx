@@ -60,14 +60,10 @@ export const ProductCompare: React.FC<{
   left?: FoodProduct | null;
   right?: FoodProduct | null;
   candidates: FoodProduct[];
-  leftPrice?: number;
-  rightPrice?: number;
 }> = ({
   left,
   right,
   candidates,
-  leftPrice = 3.99,
-  rightPrice = 3.99,
 }) => {
   const leftShown = left ? shownMacros(left) : null;
   const rightShown = right ? shownMacros(right) : null;
