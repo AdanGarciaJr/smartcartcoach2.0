@@ -75,7 +75,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
         }),
       });
     } catch {
-      // Never let telemetry break the scanner UX
+      // telemetry should never break scanner UX
     }
   }
 
