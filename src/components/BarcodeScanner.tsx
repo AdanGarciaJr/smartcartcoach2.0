@@ -62,7 +62,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
       setScanning(false);
     };
   }, []);
-
+//yo
   async function logScanEvent(event: Omit<ScanTelemetryEvent, "timestamp" | "userAgent">) {
     try {
       await fetch("https://smartcartcoach2-0.onrender.com/api/scan-event", {
