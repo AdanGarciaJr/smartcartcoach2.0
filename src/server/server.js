@@ -61,7 +61,6 @@ app.post("/api/scan-event", async (req, res) => {
       used_manual_entry:
         typeof usedManualEntry === "boolean" ? usedManualEntry : false,
       user_agent: userAgent ?? null,
-      created_at: timestamp ?? new Date().toISOString(),
     });
 
     if (error) {
