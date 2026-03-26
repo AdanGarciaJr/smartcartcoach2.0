@@ -1,4 +1,3 @@
-
 import React, { useEffect, useRef, useState } from "react";
 import { BrowserMultiFormatReader, IScannerControls } from "@zxing/browser";
 import { Result } from "@zxing/library";
@@ -8,10 +7,38 @@ interface BarcodeScannerProps {
   onProductLoaded?: (product: FoodProduct) => void;
 }
 
+type ScanEventType =
+  | "scan_started"
+  | "scan_stopped"
+  | "scan_success"
+  | "scan_failure"
+  | "manual_lookup_used"
+  | "product_lookup_success"
+  | "product_lookup_failed";
+
+interface ScanTelemetryEvent {
+  eventType: ScanEventType;
+  sessionId: string;
+  timestamp: string;
+  success?: boolean;
+  barcode?: string;
+  errorMessage?: string;
+  timeToScanMs?: number;
+  usedManualEntry?: boolean;
+  userAgent?: string;
+}
+
+function makeSessionId(): string {
+  return `scan_${Date.now()}_${Math.random().toString(36).slice(2, 10)}`;
+}
+
 export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded }) => {
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const readerRef = useRef<BrowserMultiFormatReader | null>(null);
   const controlsRef = useRef<IScannerControls | null>(null);
+
+  const scanSessionIdRef = useRef<string>(makeSessionId());
+  const scanStartedAtRef = useRef<number | null>(null);
 
   const [manualBarcode, setManualBarcode] = useState("");
   const [scanning, setScanning] = useState(false);
@@ -20,8 +47,6 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
   const [error, setError] = useState("");
 
   const [product, setProduct] = useState<FoodProduct | null>(null);
-
-  // NEW: show macros per serving if available (fallback to per 100g)
   const [basis, setBasis] = useState<"serving" | "100g">("serving");
 
   useEffect(() => {
@@ -38,7 +63,23 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
     };
   }, []);
 
-  async function handleBarcodeDetected(text: string) {
+  async function logScanEvent(event: Omit<ScanTelemetryEvent, "timestamp" | "userAgent">) {
+    try {
+      await fetch("https://smartcartcoach2-0.onrender.com/api/scan-event", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          ...event,
+          timestamp: new Date().toISOString(),
+          userAgent: navigator.userAgent,
+        }),
+      });
+    } catch {
+      // Never let telemetry break the scanner UX
+    }
+  }
+
+  async function handleBarcodeDetected(text: string, usedManualEntry = false) {
     const cleaned = String(text || "").trim();
     if (!cleaned) return;
 
@@ -49,9 +90,30 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
       const p = await fetchFoodByBarcode(cleaned);
       setProduct(p);
       onProductLoaded?.(p);
+
+      await logScanEvent({
+        eventType: "product_lookup_success",
+        sessionId: scanSessionIdRef.current,
+        success: true,
+        barcode: cleaned,
+        usedManualEntry,
+        timeToScanMs:
+          scanStartedAtRef.current != null ? Date.now() - scanStartedAtRef.current : undefined,
+      });
     } catch (e: any) {
       setProduct(null);
       setError(e?.message || "Could not fetch product for that barcode");
+
+      await logScanEvent({
+        eventType: "product_lookup_failed",
+        sessionId: scanSessionIdRef.current,
+        success: false,
+        barcode: cleaned,
+        errorMessage: e?.message || "Could not fetch product for that barcode",
+        usedManualEntry,
+        timeToScanMs:
+          scanStartedAtRef.current != null ? Date.now() - scanStartedAtRef.current : undefined,
+      });
     } finally {
       setLoading(false);
     }
@@ -63,14 +125,36 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
 
     if (!readerRef.current) {
       setError("Scanner not ready.");
+      await logScanEvent({
+        eventType: "scan_failure",
+        sessionId: scanSessionIdRef.current,
+        success: false,
+        errorMessage: "Scanner not ready.",
+      });
       return;
     }
+
     if (!videoRef.current) {
       setError("Video element not available.");
+      await logScanEvent({
+        eventType: "scan_failure",
+        sessionId: scanSessionIdRef.current,
+        success: false,
+        errorMessage: "Video element not available.",
+      });
       return;
     }
 
     try {
+      scanSessionIdRef.current = makeSessionId();
+      scanStartedAtRef.current = Date.now();
+
+      await logScanEvent({
+        eventType: "scan_started",
+        sessionId: scanSessionIdRef.current,
+        success: true,
+      });
+
       setScanning(true);
 
       const controls = await readerRef.current.decodeFromVideoDevice(
@@ -82,35 +166,78 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
           const text = result.getText();
           if (!text) return;
 
-          // stop after first successful scan
           try {
             controls.stop();
           } catch {
             // ignore
           }
+
           controlsRef.current = null;
           setScanning(false);
 
-          await handleBarcodeDetected(text);
+          await logScanEvent({
+            eventType: "scan_success",
+            sessionId: scanSessionIdRef.current,
+            success: true,
+            barcode: text,
+            timeToScanMs:
+              scanStartedAtRef.current != null ? Date.now() - scanStartedAtRef.current : undefined,
+          });
+
+          await handleBarcodeDetected(text, false);
         }
       );
 
       controlsRef.current = controls;
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
       setScanning(false);
       setError("Could not start camera. Check browser permissions and try again.");
+
+      await logScanEvent({
+        eventType: "scan_failure",
+        sessionId: scanSessionIdRef.current,
+        success: false,
+        errorMessage: err?.message || "Could not start camera",
+      });
     }
   }
 
-  function stopScan() {
+  async function stopScan() {
     try {
       controlsRef.current?.stop();
     } catch {
       // ignore
     }
+
     controlsRef.current = null;
     setScanning(false);
+
+    await logScanEvent({
+      eventType: "scan_stopped",
+      sessionId: scanSessionIdRef.current,
+      success: true,
+      timeToScanMs:
+        scanStartedAtRef.current != null ? Date.now() - scanStartedAtRef.current : undefined,
+    });
+  }
+
+  async function handleManualLookup() {
+    const cleaned = manualBarcode.trim();
+    if (!cleaned) return;
+
+    scanSessionIdRef.current = makeSessionId();
+    scanStartedAtRef.current = Date.now();
+
+    await logScanEvent({
+      eventType: "manual_lookup_used",
+      sessionId: scanSessionIdRef.current,
+      success: true,
+      barcode: cleaned,
+      usedManualEntry: true,
+    });
+
+    await handleBarcodeDetected(cleaned, true);
   }
 
   const servingAvailable =
@@ -171,7 +298,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
           <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
             <button
               type="button"
-              onClick={() => handleBarcodeDetected(manualBarcode)}
+              onClick={handleManualLookup}
               disabled={loading || !manualBarcode.trim()}
             >
               Lookup barcode
@@ -257,6 +384,7 @@ export const BarcodeScanner: React.FC<BarcodeScannerProps> = ({ onProductLoaded 
                   {shown?.fat != null && <li>Fat: {shown.fat} g</li>}
                   {shown?.protein != null && <li>Protein: {shown.protein} g</li>}
                   {shown?.salt != null && <li>Salt: {shown.salt} g</li>}
+                  {shown?.fiber != null && <li>Fiber: {shown.fiber} g</li>}
                 </ul>
 
                 {!servingAvailable && (
