@@ -90,24 +90,32 @@ app.get("/api/scan-stats", async (_req, res) => {
       return res.status(500).json({ error: "Failed to read scan stats" });
     }
 
-    const scanSuccessCount = data.filter(
-      (e) => e.event_type === "scan_success"
-    ).length;
+    let successCount = 0;
+    let failureCount = 0;
 
-    const scanFailureCount = data.filter(
-      (e) => e.event_type === "scan_failure"
-    ).length;
+    for (const row of data) {
+      if (row.event_type === "product_lookup_success") {
+        successCount += 1;
+      }
 
-    const totalAttempts = scanSuccessCount + scanFailureCount;
+      if (
+        row.event_type === "product_lookup_failed" ||
+        row.event_type === "scan_failure"
+      ) {
+        failureCount += 1;
+      }
+    }
+
+    const totalAttempts = successCount + failureCount;
 
     const successRatePercent =
       totalAttempts > 0
-        ? Number(((scanSuccessCount / totalAttempts) * 100).toFixed(2))
+        ? Number(((successCount / totalAttempts) * 100).toFixed(2))
         : 0;
 
     return res.json({
-      scanSuccessCount,
-      scanFailureCount,
+      successCount,
+      failureCount,
       totalAttempts,
       successRatePercent,
     });
