@@ -71,7 +71,6 @@ export const App: React.FC = () => {
                             groceryRef.current?.addExternalItem({
                               name: item.name,
                               calories: item.nutriments.energyKcal ?? 0,
-                              price: 3.99,
                             })
                           }
                         >
